@@ -5,10 +5,14 @@ import instructables_ik as IK
 if __name__ == '__main__':
     CSV_CONFIG_PATH = '/home/borat/spider_code/spider_base_positions.csv'
     spider = sp.Spider(CSV_CONFIG_PATH)
-    spider.straighten()
+    # spider.straighten()
+    # spider.straighten()
+    spider.boot()
     time.sleep(2)
-    # spider.get_up()
-    # spider.legs[1].tibia_joint.set_angle(79)
+    # spider.stand()
+    # time.sleep(2)
+    # spider.lift_leg(0)
+    # spider.legs[0].femur_joint.servo.angle=52
     # spider.legs[0].get_up()
     # spider.legs[0].get_up()
     # spider.legs[0].tibia_joint.set_angle(150)
