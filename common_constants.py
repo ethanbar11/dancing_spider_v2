@@ -15,7 +15,7 @@ y_start = 0
 y_step = 40
 y_default = x_default
 
-# Walking constants, everything in cms
+# Walking constants, everything in mm
 STEP_LENGTH = 75
 STEP_LENGTH_LEG_2 = 60
 SIN_MAX_HEIGHT = 30
@@ -24,3 +24,11 @@ STEP_TIME=1
 
 # Servo constants
 SERVO_FREQUENCY=50
+
+# Dance constancts, everything in mm
+
+# Lift Leg move constants
+LIFT_LEG_FINAL_Z=-20
+
+# Twerking constants
+TWERK_AMOUNT=60

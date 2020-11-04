@@ -2,13 +2,6 @@ from common_constants import *
 import math
 
 
-# Only works for numbers 0<=x<=1
-def sin_walk(start_pos, phi, end_pose=None):
-    return start_pos[0], \
-           start_pos[1] + phi * STEP_LENGTH, \
-           start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
-
-
 # x is phi
 def silly_tan_walk(start_pos, phi, end_pos):
     if phi <= 1 / 2:
@@ -30,7 +23,7 @@ def silly_tan_walk_reversed(start_pos, phi, end_pos):
         diff = end_pos[0] - start_pos[0]
         progress_x = diff * phi * 2
 
-        return start_pos[0]+progress_x, start_pos[1] , \
+        return start_pos[0] + progress_x, start_pos[1], \
                start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
     else:
         diff = end_pos[1] - start_pos[1]
@@ -40,30 +33,18 @@ def silly_tan_walk_reversed(start_pos, phi, end_pos):
                start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
 
 
-# Phi is i/n division, the current part of the curve.
-def sin_walk_reverse(start_pos, phi, end_pose=None):
-    return start_pos[0], \
-           start_pos[1] - phi * STEP_LENGTH_LEG_2, \
-           start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
+# Dance Moves
+# From stand
+def leg_up_and_down(start_pos, phi, end_pos=None):
+    if phi <= 1 / 2:
+        new_z = start_pos[2] + 2 * phi * (LIFT_LEG_FINAL_Z - start_pos[2])
+    else:
+        new_z = LIFT_LEG_FINAL_Z + 2 * (phi - 1 / 2) * (start_pos[2] - LIFT_LEG_FINAL_Z)
+    return start_pos[0], start_pos[1], new_z
 
 
-def backward_sin_walk(start_pos, phi, end_pos=None):
-    if phi >= 2 / 3:
-        return start_pos[0] + SIN_MAX_WIDTH * math.sin(1 / 2 * math.pi), \
-               start_pos[1] - phi * STEP_LENGTH, \
-               start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
-
-    return start_pos[0] + SIN_MAX_WIDTH * math.sin(phi * math.pi), \
-           start_pos[1] - phi * STEP_LENGTH, \
-           start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
-
-
-def backward_sin_walk_reverse(start_pos, phi, end_pos=None):
-    if phi >= 2 / 3:
-        return start_pos[0] + SIN_MAX_WIDTH * math.sin(1 / 2 * math.pi), \
-               start_pos[1] + phi * STEP_LENGTH_LEG_2, \
-               start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
-
-    return start_pos[0] + SIN_MAX_WIDTH * math.sin(phi * math.pi), \
-           start_pos[1] + phi * STEP_LENGTH_LEG_2, \
-           start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
+def move_leg_straight_line(start_pose, phi, end_pose):
+    x = start_pose[0] + phi * (end_pose[0] - start_pose[0])
+    y = start_pose[1] + phi * (end_pose[1] - start_pose[1])
+    z = start_pose[2] + phi * (end_pose[2] - start_pose[2])
+    return x, y, z
