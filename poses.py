@@ -7,46 +7,55 @@ def next_action_movement_or_pose():
     return random.random() > MOVEMENT_THRESHOLD
 
 
-class Stand:
+class StandBase:
     def __init__(self, spider):
         self.spider = spider
-        self.movements = [LiftLeg(self.spider)]
         self.connected_poses = None
 
-    def perform_pose(self, start_time, t):
+    # Should be overriden by son
+    def perform_pose(self, t):
+        pass
+
+    def perform_pose_wrapped(self, t):
+        self.spider.time_master.start_movement()
+        self.perform_pose(t)
+        self.spider.time_master.end_movement()
+
+
+class Stand(StandBase):
+    def __init__(self, spider):
+        super().__init__(spider)
+        self.movements = [LiftLeg(self.spider)]
+
+    def perform_pose(self, t):
         self.spider.legs[0].set_angles_from_r(x_default - x_offset, y_start + y_step, z_default)
         self.spider.legs[1].set_angles_from_r(x_default - x_offset, -(y_start + y_step), z_default)
         self.spider.legs[2].set_angles_from_r(x_default + x_offset, y_start, z_default)
         self.spider.legs[3].set_angles_from_r(x_default + x_offset, y_start, z_default)
-        wait(start_time, t)
 
 
-class DanceStand:
+class DanceStand(StandBase):
     def __init__(self, spider):
-        self.spider = spider
+        super().__init__(spider)
         self.movements = [Twerk(self.spider)]
-        self.connected_poses = None
 
-    def perform_pose(self, start_time, t):
+    def perform_pose(self, t):
         self.spider.legs[0].set_angles_from_r(x_default, y_default, z_default)
         self.spider.legs[1].set_angles_from_r(x_default, -y_default, z_default)
         self.spider.legs[2].set_angles_from_r(x_default, y_default, z_default)
         self.spider.legs[3].set_angles_from_r(x_default, -y_default, z_default)
-        wait(start_time, t)
 
 
-class HumpStand:
+class HumpStand(StandBase):
     def __init__(self, spider):
-        self.spider = spider
+        super().__init__(spider)
         self.movements = [Hump(self.spider)]
-        self.connected_poses = None
 
-    def perform_pose(self, start_time, t):
+    def perform_pose(self, t):
         self.spider.legs[0].set_angles_from_r(x_default, y_default, z_hump_stand + 30)
         self.spider.legs[1].set_angles_from_r(x_default, -y_default, z_hump_stand - 30)
         self.spider.legs[2].set_angles_from_r(x_default, y_default, z_hump_stand - 30)
         self.spider.legs[3].set_angles_from_r(x_default, -y_default, z_hump_stand + 30)
-        wait(start_time, t)
 
 
 stand = Stand(None)

@@ -4,6 +4,7 @@ import random
 import analyze_song
 import poses
 import modifyDanceList
+from time_master import TimeMaster
 
 
 class SpiderScenario:
@@ -21,8 +22,8 @@ class SpiderScenario:
         self.hump_stand.connected_poses = [self.stand, self.dance_stand]
 
         # Going to base position and waiting for start sniffing.
-        self.current_pose = self.stand
-        self.current_pose.perform_pose(time.time(), 0.5)
+        # self.current_pose = self.stand
+        # self.current_pose.perform_pose(0.5)
 
     def start_sniffing(self):
         # Should write here code to walk forward, backwards and
@@ -33,22 +34,26 @@ class SpiderScenario:
         # times_by_beat_to_dance = modifyDanceList.get_modified_list(times, start_time)
         times_by_beat_to_dance = analyze_song.get_song_analysis("nicki minaj", "anaconda")
         # Yeah right here it ends
-        start_time = time.time()
+        self.spider.time_master = TimeMaster(times_by_beat_to_dance)
+        # start_time = time.time()
+        # real_start_time=time.time()
         self.current_pose = self.stand
-        self.current_pose.perform_pose(start_time, times_by_beat_to_dance[0])
+        self.current_pose.perform_pose_wrapped(times_by_beat_to_dance[0])
         idx = 1
         while idx < len(times_by_beat_to_dance):
             start_time = time.time()
             t = times_by_beat_to_dance[idx]
             move_to_other_pose = poses.next_action_movement_or_pose()
+            # move_to_other_pose = False
             if move_to_other_pose:
                 self.current_pose = random.choice(self.current_pose.connected_poses)
-                self.current_pose.perform_pose(start_time, t)
+                print('Moveing to pose : {}'.format(type(self.current_pose)))
+                self.current_pose.perform_pose_wrapped(t)
                 idx += 1
             else:
                 move_to_make = random.choice(self.current_pose.movements)
                 times_to_make_move = random.randint(move_to_make.min_reps, move_to_make.max_reps)
+                print('Performing move {} {} times'.format(type(move_to_make), times_to_make_move))
                 for t in times_by_beat_to_dance[idx:idx + times_to_make_move]:
-                    move_to_make.perform_move(start_time, t, freq=SERVO_FREQUENCY)
-                    start_time = time.time()
-                idx += times_to_make_move
+                    move_to_make.perform_move_wrapped(t, freq=SERVO_FREQUENCY)
+                    idx += 1

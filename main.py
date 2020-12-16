@@ -9,7 +9,7 @@ if __name__ == '__main__':
     print('hello')
     artist_name = "nicki minaj"
     song_name = "anaconda"
-    CSV_CONFIG_PATH = '/home/borat/spider_code/spider_base_positions.csv'
+    CSV_CONFIG_PATH = './spider_base_positions.csv'
 
     scen = scenario_spider.SpiderScenario(CSV_CONFIG_PATH)
     scen.start_dancing(None,None)
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # pub.subscribe(scen.start_dancing, 'start_dancing')
     # robot_server.app.run('0.0.0.0')
     # Working IMPORTANT ENDING
-    scen.start_dancing()
+    # scen.start_dancing()
 # from analyze_song import get_song_analysis
 #
 # if __name__ == '__main__':

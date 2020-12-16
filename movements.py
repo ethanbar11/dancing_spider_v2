@@ -8,27 +8,33 @@ from common_constants import *
 # Real ratio of movements meaning how much time is allocated for the movement,
 # And how much is allocated for being in the position for the beat.
 
-def wait(start_time, total_action_time):
-    while time.time() - start_time < total_action_time:
-        pass
-
 
 # Here for the default params
 class Movement:
     def __init__(self, spider):
         self.min_time = 0.2
-        self.min_reps = 8
-        self.max_reps = 20
+        # self.min_reps = 8
+        self.min_reps = 1
+        self.max_reps = 3
+        # self.max_reps = 20
         self.spider = spider
         self.real_ratio_of_movement = 3 / 5
 
+    # Should be override in son
+    def perform_move(self, t, freq):
+        pass
+
+    def perform_move_wrapped(self, t, freq):
+        self.spider.time_master.start_movement()
+        self.perform_move(t, freq)
+        self.spider.time_master.end_movement()
+
 
 class LiftLeg(Movement):
-    def perform_move(self, start_time, t, freq):
+    def perform_move(self, t, freq):
         self.spider.legs[2].perform_func_with_axis(t * self.real_ratio_of_movement,
                                                    freq,
                                                    motions.leg_up_and_down)
-        wait(start_time, t)
 
 
 # Expecting to be in Hump stand with head up
@@ -44,12 +50,10 @@ class Hump(Movement):
                                            motions.move_leg_straight_line,
                                            end_poses)
 
-    def perform_move(self, start_time1,  t, freq):
+    def perform_move(self, t, freq):
         self.hump_half_move(t * self.real_ratio_of_movement / 2, freq, backwords=False)
-        wait(start_time1, t / 2)
-        start_time2 = time.time()
+        self.spider.time_master.part_of_movement(1 / 2)
         self.hump_half_move(t * self.real_ratio_of_movement / 2, freq, backwords=True)
-        wait(start_time2, t / 2)
 
 
 class Twerk(Movement):
@@ -65,10 +69,7 @@ class Twerk(Movement):
                                            motions.move_leg_straight_line,
                                            end_poses)
 
-    def perform_move(self, start_time1, t, freq):
+    def perform_move(self, t, freq):
         self.ass_half_move(t * self.real_ratio_of_movement / 2, freq, up=True)
-        wait(start_time1, t / 2)
-        start_time2 = time.time()
+        self.spider.time_master.part_of_movement(1 / 2)
         self.ass_half_move(t * self.real_ratio_of_movement / 2, freq, up=False)
-        wait(start_time2, t / 2)
-        print(t, time.time() - start_time1)

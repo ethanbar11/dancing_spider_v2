@@ -35,8 +35,9 @@ class Joint:
         self.angle = None
 
     def set_angle(self, angle):
-        self.servo.angle = angle
-        self.angle = angle
+        # self.servo.angle = angle
+        # self.angle = angle
+        pass
 
     def straighten(self):
         self.servo.angle = self.zero_a
@@ -146,13 +147,17 @@ def get_servos_dictionary(kit):
 
 class Spider:
     def __init__(self, csv_path):
-        self.i2c = busio.I2C(board.SCL, board.SDA)
-        self.pca = adafruit_pca9685.PCA9685(self.i2c)
-        self.kit = ServoKit(channels=16)
-        self.pca.frequency = 60
+        # self.i2c = busio.I2C(board.SCL, board.SDA)
+        # self.pca = adafruit_pca9685.PCA9685(self.i2c)
+        # self.kit = ServoKit(channels=16)
+        # self.pca.frequency = 60
+        self.time_master=None
         self.joints = {}
         self.legs = []
-        servos = get_servos_dictionary(self.kit)
+        servos = {'1A': '', '1B': '', '1C': '', '2A': [], '2B': [],
+                  '2C': [], '3A': [], '3B': [], '3C': [], '4A': [],
+                  '4B': [], '4C': []}
+        # get_servos_dictionary(self.kit)
         self.init_joints(csv_path, servos)
         self.init_legs()
         self.is_running = True
