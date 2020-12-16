@@ -7,6 +7,7 @@ length_side = 71
 z_absolute = -28
 
 z_default = -50
+z_hump_stand = -70
 z_up = -30
 z_boot = z_absolute
 x_default = 62
@@ -20,15 +21,21 @@ STEP_LENGTH = 75
 STEP_LENGTH_LEG_2 = 60
 SIN_MAX_HEIGHT = 30
 SIN_MAX_WIDTH = 60
-STEP_TIME=1
+STEP_TIME = 1
 
 # Servo constants
-SERVO_FREQUENCY=50
+SERVO_FREQUENCY = 50
 
 # Dance constancts, everything in mm
 
 # Lift Leg move constants
-LIFT_LEG_FINAL_Z=-20
+LIFT_LEG_FINAL_Z = -20
 
 # Twerking constants
-TWERK_AMOUNT=60
+TWERK_AMOUNT = 60
+
+# HUMP constants
+HUMP_AMOUNT=30
+
+# RANDOM POSE OR MOVEMENT THRESHOLD
+MOVEMENT_THRESHOLD=0.6

@@ -1,4 +1,5 @@
 /* -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
   - Project: Remote control Crawling robot
   - Author:  panerqiang@sunfounder.com
   - Date:  2015/1/27
@@ -591,7 +592,7 @@ void hand_shake(int i)
   }
 }
 
-void head_up(int i)
+    void head_up(int i)
 {
   set_site(0, KEEP, KEEP, site_now[0][2] - i);
   set_site(1, KEEP, KEEP, site_now[1][2] + i);

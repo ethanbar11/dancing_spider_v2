@@ -9,6 +9,9 @@ import threading
 from common_constants import *
 import motions
 
+sum1 = 0
+counter = 0
+
 
 def int_or_zero(x):
     try:
@@ -73,7 +76,7 @@ class Leg:
         a, b, g = IK.axis_to_angle(self.num, x, y, z)
 
         a, b, g = self.add_hard_coded_angle_fix(a, b, g)
-        print('alpha : {} beta : {} gamma : {}'.format(a, b, g))
+        # print('alpha : {} beta : {} gamma : {}'.format(a, b, g))
 
         self.coxa_joint.set_angle(a)
         self.femur_joint.set_angle(b)
@@ -104,14 +107,24 @@ class Leg:
                                                   self.tibia_joint.angle)
 
     def perform_func_with_axis(self, t, freq, func, end_pos=None):
+        first_time = time.time()
         points = self.func2seg_axis(t, freq, func, end_pos)
+        second_time = time.time()
+        real_time_to_sleep = t - (second_time - first_time)
+        time_to_wait = real_time_to_sleep / len(points)
         for point in points:
-            print(point)
+            third_time = time.time()
             self.set_angles_from_r(point[0], point[1], point[2])
-            time.sleep(1 / freq)
-
-    # def perform_func_with_angles(self, t, freq, func, end_pos=None):
-    #     points = self.func2seg_axis
+            fourth_time = time.time()
+            real_time_to_sleep -= (fourth_time - third_time)
+            if real_time_to_sleep > time_to_wait:
+                while time.time() - fourth_time < time_to_wait:
+                    pass
+                # time.sleep(0.002)
+                real_time_to_sleep -= time_to_wait
+            else:
+                while time.time() - fourth_time < real_time_to_sleep:
+                    pass
 
     # t is time
     def func2seg_axis(self, t, freq, func, end_pos=None):
@@ -166,18 +179,6 @@ class Spider:
             leg.straighten()
             time.sleep(0.01)
 
-    def stand(self):
-        self.legs[0].set_angles_from_r(x_default - x_offset, y_start + y_step, z_default)
-        self.legs[1].set_angles_from_r(x_default - x_offset, -(y_start + y_step), z_default)
-        self.legs[2].set_angles_from_r(x_default + x_offset, y_start, z_default)
-        self.legs[3].set_angles_from_r(x_default + x_offset, y_start, z_default)
-
-    def dance_stand(self):
-        self.legs[0].set_angles_from_r(x_default, y_default, z_default)
-        self.legs[1].set_angles_from_r(x_default, -y_default, z_default)
-        self.legs[2].set_angles_from_r(x_default, y_default, z_default)
-        self.legs[3].set_angles_from_r(x_default, -y_default, z_default)
-
     def step_forward(self):
         self.legs[2].step_forward()
         for leg in self.legs[::-1]:
@@ -200,34 +201,35 @@ class Spider:
 
     # Performing function over all 4 legs. We have same function only for one leg inside Leg.
     def perform_func_with_axis(self, t, freq, func, end_poses=None):
+        first_time = time.time()
         points = self.func2seg_axis(t, freq, func, end_poses)
         points_amount = len(points[0])
+        second_time = time.time()
+        real_time_to_sleep = t - (second_time - first_time)
+        time_to_wait = 0.02
         for i in range(points_amount):
             for j in range(4):
-                leg_num = j + 1
+                third_time = time.time()
                 point = points[j][i]
-                print(leg_num, point)
                 self.legs[j].set_angles_from_r(point[0], point[1], point[2])
-            time.sleep(1 / freq)
+                fourth_time = time.time()
+                real_time_to_sleep -= (fourth_time - third_time)
+            current_time = time.time()
+            if real_time_to_sleep > time_to_wait:
+                while time.time() - current_time < time_to_wait:
+                    pass
+            real_time_to_sleep -= time_to_wait
 
-    def ass_up(self, total_time, freq):
-        end_poses = [(self.legs[0].pos[0], self.legs[0].pos[1], self.legs[0].pos[2] - 60),
-                     self.legs[1].pos,
-                     self.legs[2].pos,
-                     (self.legs[3].pos[0], self.legs[3].pos[1], self.legs[3].pos[2] - 60)]
-        self.perform_func_with_axis(total_time,
-                                    freq,
-                                    motions.move_leg_straight_line,
-                                    end_poses)
-        # self.legs[0].set_angles_from_r(self.legs[0].pos[0], self.legs[0].pos[1], self.legs[0].pos[2] - 60)
-        # self.legs[3].set_angles_from_r(self.legs[3].pos[0], self.legs[3].pos[1], self.legs[3].pos[2] - 60)
+    def heap_rotate_dance(self, total_time, freq, lefty=True):
+        ANGLES_TO_ROT_VAL = 20
+        angle_to_rotate = -ANGLES_TO_ROT_VAL if lefty else ANGLES_TO_ROT_VAL
+        n = total_time * freq
 
-    def ass_down(self, total_time, freq):
-        end_poses = [(self.legs[0].pos[0], self.legs[0].pos[1], self.legs[0].pos[2] + 60),
-                     self.legs[1].pos,
-                     self.legs[2].pos,
-                     (self.legs[3].pos[0], self.legs[3].pos[1], self.legs[3].pos[2] + 60)]
-        self.perform_func_with_axis(total_time,
-                                    freq,
-                                    motions.move_leg_straight_line,
-                                    end_poses)
+        for i in range(angle_to_rotate):
+            for leg in self.legs:
+                current_angle = leg.coxa_joint.angle
+                leg.coxa_joint.set_angle(current_angle + angle_to_rotate / n)
+                leg.x, leg.y, leg.z = IK.angle_to_axis(leg.num, leg.coxa_joint.angle,
+                                                       leg.femur_joint.angle,
+                                                       leg.tibia_joint.angle)
+                time.sleep(total_time / n)
