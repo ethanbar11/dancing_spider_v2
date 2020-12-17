@@ -37,6 +37,7 @@ class Joint:
     def set_angle(self, angle):
         self.servo.angle = angle
         self.angle = angle
+        # pass
 
     def straighten(self):
         self.servo.angle = self.zero_a
@@ -64,7 +65,6 @@ class Leg:
         self.coxa_joint.set_angle(90)
         self.femur_joint.set_angle(90)
         self.tibia_joint.set_angle(180)
-        # self.set_angles_from_r(TOTAL, 0, 0)
 
     def get_up(self):
         self.set_angles_from_r(20, 20, -50)
@@ -76,7 +76,6 @@ class Leg:
         a, b, g = IK.axis_to_angle(self.num, x, y, z)
 
         a, b, g = self.add_hard_coded_angle_fix(a, b, g)
-        # print('alpha : {} beta : {} gamma : {}'.format(a, b, g))
 
         self.coxa_joint.set_angle(a)
         self.femur_joint.set_angle(b)
@@ -86,30 +85,38 @@ class Leg:
         self.y = y
         self.z = z
 
-    def rotate_step(self):
-        if self.num == 1 or self.num == 4:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk_reversed,
-                                        (x_default + x_offset - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
-                                         y_start - SPIDER_RADIUS / math.sqrt(2), z_default))
-        elif self.num == 2:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk,
-                                        (25.3 - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
-                                         -56.8 - SPIDER_RADIUS / math.sqrt(2), -50))
-        elif self.num == 3:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk,
-                                        (25.3 - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
-                                         56.8 - SPIDER_RADIUS / math.sqrt(2), -50))
-    def step_forward(self, t, freq):
+    def rotate_step(self, t, freq):
+        if self.num != 1:
+            self.perform_func_with_axis(t, freq, motions.silly_tan_rotate,
+                                        (self.x + SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
+                                         self.y - SPIDER_RADIUS / math.sqrt(2), z_default))
+        else:
+            self.perform_func_with_axis(t, freq, motions.silly_tan_rotate,
+                                        (self.x - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
+                                         self.y + SPIDER_RADIUS / math.sqrt(2), z_default))
+
+    def step(self, t, freq, is_step_forward):
+        step_forward_mul = 1 if is_step_forward else -1
         if self.num == 1 or self.num == 4:
             self.perform_func_with_axis(t, freq, motions.silly_tan_walk_reversed,
                                         (x_default + x_offset, y_start, z_default))
         elif self.num == 2:
-            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, -56.8, -50))
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, step_forward_mul * -56.8, z_default))
         elif self.num == 3:
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, step_forward_mul * 56.8, z_default))
+
+    def step_backwards(self, t, freq):
+        if self.num == 2 or self.num == 3:
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk_reversed,
+                                        (x_default + x_offset, y_start, z_default))
+        elif self.num == 4:
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, -56.8, -50))
+        elif self.num == 1:
             self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, 56.8, -50))
 
-    def move_heap_forward(self):
-        angle_to_add = -33
+    def move_heap(self, is_forward):
+        mul_forward = 1 if is_forward else -1
+        angle_to_add = mul_forward * -33
 
         if self.num <= 2:
             angle_to_add *= -1
@@ -144,7 +151,7 @@ class Leg:
         n = int(t * freq)
         x = []
         for i in range(n + 1):
-            x.append(func(self.pos, i/n, end_pos))
+            x.append(func(self.pos, i / n, end_pos))
         return x
         # return [func(self.pos, i / n, end_pos) for i in range(n + 1)]
 
@@ -156,9 +163,9 @@ class Leg:
 def get_servos_dictionary(kit):
     for i in range(16):
         kit.servo[i].set_pulse_width_range(500, 2400)
-    return {'1A': kit.servo[2], '1B': kit.servo[1], '1C': kit.servo[0], '2A': kit.servo[6], '2B': kit.servo[5],
-            '2C': kit.servo[4], '3A': kit.servo[10], '3B': kit.servo[9], '3C': kit.servo[8], '4A': kit.servo[14],
-            '4B': kit.servo[13], '4C': kit.servo[12]}
+    return {'1C': kit.servo[2], '1B': kit.servo[1], '1A': kit.servo[0], '2C': kit.servo[6], '2B': kit.servo[5],
+            '2A': kit.servo[4], '3C': kit.servo[10], '3B': kit.servo[9], '3A': kit.servo[8], '4C': kit.servo[14],
+            '4B': kit.servo[13], '4A': kit.servo[12]}
 
 
 class Spider:
@@ -171,8 +178,8 @@ class Spider:
         self.joints = {}
         self.legs = []
         # servos = {'1A': '', '1B': '', '1C': '', '2A': [], '2B': [],
-        #          '2C': [], '3A': [], '3B': [], '3C': [], '4A': [],
-        #          '4B': [], '4C': []}
+        #           '2C': [], '3A': [], '3B': [], '3C': [], '4A': [],
+        #           '4B': [], '4C': []}
         servos = get_servos_dictionary(self.kit)
         self.init_joints(csv_path, servos)
         self.init_legs()
@@ -200,6 +207,14 @@ class Spider:
             leg.straighten()
             time.sleep(0.01)
 
+    # Getting points for all for legs. We have same function for only one leg inside Leg.
+    def func2seg_axis(self, t, freq, func, end_poses=None):
+        n = int(t * freq)
+        legs_points = []
+        for idx, leg in enumerate(self.legs):
+            legs_points.append([func(leg.pos, i / n, end_poses[idx]) for i in range(n + 1)])
+        return legs_points
+
     def rotate_step(self):
         self.legs[3].rotate_step()
         self.legs[0].rotate_step()
@@ -214,26 +229,6 @@ class Spider:
         #     leg.move_heap_forward()
         # time.sleep(0.5)
         # self.legs[3].step_forward()
-
-    def step_forward(self):
-        self.legs[2].step_forward()
-        for leg in self.legs[::-1]:
-            leg.move_heap_forward()
-        time.sleep(0.5)
-        self.legs[0].step_forward()
-        self.legs[1].step_forward()
-        for leg in self.legs[::-1]:
-            leg.move_heap_forward()
-        time.sleep(0.5)
-        self.legs[3].step_forward()
-
-    # Getting points for all for legs. We have same function for only one leg inside Leg.
-    def func2seg_axis(self, t, freq, func, end_poses=None):
-        n = int(t * freq)
-        legs_points = []
-        for idx, leg in enumerate(self.legs):
-            legs_points.append([func(leg.pos, i / n, end_poses[idx]) for i in range(n + 1)])
-        return legs_points
 
     # Performing function over all 4 legs. We have same function only for one leg inside Leg.
     def perform_func_with_axis(self, t, freq, func, end_poses=None):
@@ -255,17 +250,3 @@ class Spider:
                 while time.time() - current_time < time_to_wait:
                     pass
             real_time_to_sleep -= time_to_wait
-    #
-    # def heap_rotate_dance(self, total_time, freq, lefty=True):
-    #     ANGLES_TO_ROT_VAL = 20
-    #     angle_to_rotate = -ANGLES_TO_ROT_VAL if lefty else ANGLES_TO_ROT_VAL
-    #     n = total_time * freq
-    #
-    #     for i in range(angle_to_rotate):
-    #         for leg in self.legs:
-    #             current_angle = leg.coxa_joint.angle
-    #             leg.coxa_joint.set_angle(current_angle + angle_to_rotate / n)
-    #             leg.x, leg.y, leg.z = IK.angle_to_axis(leg.num, leg.coxa_joint.angle,
-    #                                                    leg.femur_joint.angle,
-    #                                                    leg.tibia_joint.angle)
-    #             time.sleep(total_time / n)

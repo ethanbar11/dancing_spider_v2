@@ -22,5 +22,5 @@ if __name__ == '__main__':
     servos = get_servos_dictionary(kit)
     for servo_name in servos.keys():
         servos[servo_name].angle = 90
-        print(servo_name,str(servos[servo_name].angle))
+        print(servo_name, str(servos[servo_name].angle))
         time.sleep(0.1)

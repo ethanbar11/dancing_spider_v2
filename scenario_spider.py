@@ -38,14 +38,14 @@ class SpiderScenario:
         times_by_beat_to_dance = analyze_song.get_song_analysis("nicki minaj", "anaconda")
         # Yeah right here it ends
         self.spider.time_master = TimeMaster(times_by_beat_to_dance)
-        self.current_pose = self.dance_stand
+        self.current_pose = self.stand
         self.current_pose.perform_pose_wrapped(times_by_beat_to_dance[0])
         idx = 1
         while idx < len(times_by_beat_to_dance):
             start_time = time.time()
             t = times_by_beat_to_dance[idx]
-            move_to_other_pose = poses.next_action_movement_or_pose()
-            # move_to_other_pose = False
+            # move_to_other_pose = poses.next_action_movement_or_pose()
+            move_to_other_pose = False
             if move_to_other_pose:
                 self.current_pose = random.choice(self.current_pose.connected_poses)
                 print('Moveing to pose : {}'.format(type(self.current_pose)))
@@ -56,5 +56,5 @@ class SpiderScenario:
                 times_to_make_move = random.randint(move_to_make.min_reps, move_to_make.max_reps)
                 print('Performing move {} {} times'.format(type(move_to_make), times_to_make_move))
                 for t in times_by_beat_to_dance[idx:idx + times_to_make_move]:
-                    move_to_make.perform_move_wrapped(t, freq=SERVO_FREQUENCY)
+                    move_to_make.perform_move_wrapped(freq=SERVO_FREQUENCY)
                     idx += 1

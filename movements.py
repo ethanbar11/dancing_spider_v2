@@ -15,8 +15,8 @@ class Movement:
     def __init__(self, spider):
         # Minimal time of movement in seconds, can be overridden.
         self.min_time = 0.2
-        self.min_reps = 1
-        self.max_reps = 3
+        self.min_reps = 5
+        self.max_reps = 10
         self.spider = spider
         self.real_ratio_of_movement = 3 / 5
 
@@ -24,8 +24,8 @@ class Movement:
     def perform_move(self, freq):
         pass
 
-    def perform_move_wrapped(self, t, freq):
-        self.t = self.spider.time_master.start_movement(self)
+    def perform_move_wrapped(self, freq):
+        self.t = self.spider.time_master.start_movement(movement=self)
         self.perform_move(freq)
         self.spider.time_master.end_movement()
 
@@ -36,12 +36,16 @@ class LiftLeg(Movement):
                                                    freq,
                                                    motions.leg_up_and_down)
 
-class LiftArm(Movement):
-    def perform_move(self, t, freq):
-        self.move_to_side(t * self.real_ratio_of_movement / 2, freq, up=True)
-        self.spider.time_master.part_of_movement(1 / 2)
-        self.move_to_side(t * self.real_ratio_of_movement / 2, freq, up=False)
 
+class LiftArm(Movement):
+    def __init__(self, spider):
+        super().__init__(spider)
+        self.min_time = 0.8
+
+    def perform_move(self, freq):
+        self.move_to_side(self.t * self.real_ratio_of_movement / 2, freq, up=True)
+        self.spider.time_master.part_of_movement(1 / 2)
+        self.move_to_side(self.t * self.real_ratio_of_movement / 2, freq, up=False)
 
     def move_to_side(self, total_time, freq, up):
         target_angle = 170 if up else 30
@@ -56,11 +60,12 @@ class LiftArm(Movement):
 
         for i in range(n):
             cur_angle = self.spider.legs[2].tibia_joint.angle
-            ang=cur_angle + angles_to_rotate / n
+            ang = cur_angle + angles_to_rotate / n
             self.spider.legs[2].tibia_joint.set_angle(cur_angle + angles_to_rotate / n)
-            self.spider.legs[2].x, self.spider.legs[2].y, self.spider.legs[2].z = IK.angle_to_axis(self.spider.legs[2].num, self.spider.legs[2].coxa_joint.angle,
-                                                    self.spider.legs[2].femur_joint.angle,
-                                                    self.spider.legs[2].tibia_joint.angle)
+            self.spider.legs[2].x, self.spider.legs[2].y, self.spider.legs[2].z = IK.angle_to_axis(
+                self.spider.legs[2].num, self.spider.legs[2].coxa_joint.angle,
+                self.spider.legs[2].femur_joint.angle,
+                self.spider.legs[2].tibia_joint.angle)
             while time.time() - current_time < time_to_wait:
                 pass
             current_time = time.time()
@@ -88,7 +93,7 @@ class Hump(Movement):
 class Twerk(Movement):
     def __init__(self, spider):
         super().__init__(spider)
-        self.min_time = 2
+        self.min_time = 0.3
 
     def ass_half_move(self, total_time, freq, up):
         movement_amount = -TWERK_AMOUNT if up else TWERK_AMOUNT
@@ -112,10 +117,15 @@ class StepForward(Movement):
     def __init__(self, spider, is_forward_step):
         super().__init__(spider)
         self.min_time = 1.2
+        self.is_forward_step = is_forward_step
 
     def init_params_for_half_step(self, first):
-        front_leg = 2 if first else 1
-        back_leg = 0 if first else 3
+        if self.is_forward_step:
+            front_leg = 2 if first else 1
+            back_leg = 0 if first else 3
+        else:
+            front_leg = 3 if first else 0
+            back_leg = 1 if first else 2
         one_leg_step_time = self.t * ONE_LEG_STEP_PROPORTION
         heap_move_wait_time = self.t * ONE_HEAP_MOVE_PROPORTION
         return back_leg, front_leg, heap_move_wait_time, one_leg_step_time
@@ -123,16 +133,60 @@ class StepForward(Movement):
     def half_step(self, freq, first=False):
         back_leg, front_leg, heap_move_wait_time, one_leg_step_time = self.init_params_for_half_step(first)
 
-        self.spider.legs[front_leg].step_forward(one_leg_step_time, freq)
+        if self.is_forward_step:
+            self.spider.legs[front_leg].step(one_leg_step_time, freq, self.is_forward_step)
+        else:
+            self.spider.legs[front_leg].step_backwards(one_leg_step_time, freq)
+
         for leg in self.spider.legs[::-1]:
-            leg.move_heap_forward()
+            leg.move_heap(self.is_forward_step)
         time.sleep(heap_move_wait_time)
-        self.spider.legs[back_leg].step_forward(one_leg_step_time, freq)
+        if self.is_forward_step:
+            self.spider.legs[back_leg].step(one_leg_step_time, freq, self.is_forward_step)
+        else:
+            self.spider.legs[back_leg].step_backwards(one_leg_step_time, freq)
 
     def perform_move(self, freq):
         self.half_step(freq, first=True)
         self.spider.time_master.part_of_movement(1 / 2)
         self.half_step(freq, first=False)
+
+
+class StepRotate(Movement):
+    def perform_move(self, freq):
+        self.spider.legs[3].rotate_step(0.5,50)
+        self.spider.legs[0].rotate_step(0.5,50)
+        self.spider.legs[1].rotate_step(0.5,50)
+        self.spider.legs[2].rotate_step(0.5,50)
+        time.sleep(1000)
+
+
+#
+# class StepBackwards(Movement):
+#     def __init__(self, spider):
+#         super().__init__(spider)
+#         self.min_time = 1.2
+#
+#     def init_params_for_half_step(self, first):
+#         front_leg = 3 if first else 0
+#         back_leg = 1 if first else 2
+#         one_leg_step_time = self.t * ONE_LEG_STEP_PROPORTION
+#         heap_move_wait_time = self.t * ONE_HEAP_MOVE_PROPORTION
+#         return back_leg, front_leg, heap_move_wait_time, one_leg_step_time
+#
+#     def half_step(self, freq, first=False):
+#         back_leg, front_leg, heap_move_wait_time, one_leg_step_time = self.init_params_for_half_step(first)
+#         self.spider.legs[back_leg].step(one_leg_step_time, freq, False)
+#         for leg in self.spider.legs[::-1]:
+#             leg.move_heap(False)
+#         time.sleep(heap_move_wait_time)
+#         self.spider.legs[front_leg].step(one_leg_step_time, freq, False)
+#
+#     def perform_move(self, freq):
+#         self.half_step(freq, first=False)
+#         self.spider.time_master.part_of_movement(1 / 2)
+#         self.half_step(freq, first=True)
+
 
 class PushUp(Movement):
     def body_half_move(self, total_time, freq, down):
@@ -147,19 +201,21 @@ class PushUp(Movement):
                                            motions.move_leg_straight_line,
                                            end_poses)
 
-    def perform_move(self, t, freq):
-        self.body_half_move(t * self.real_ratio_of_movement / 2, freq, down=True)
+    def perform_move(self, freq):
+        self.body_half_move(self.t * self.real_ratio_of_movement / 2, freq, down=True)
         self.spider.time_master.part_of_movement(1 / 2)
-        self.body_half_move(t * self.real_ratio_of_movement / 2, freq, down=False)
+        self.body_half_move(self.t * self.real_ratio_of_movement / 2, freq, down=False)
+
 
 class HeapMove(Movement):
     def __init__(self, spider):
         super().__init__(spider)
-        self.min_time = 0.2 # for now...
-    def perform_move(self, t, freq):
-        self.move_to_side(t * self.real_ratio_of_movement / 2, freq, lefty=True)
+        self.min_time = 0.2  # for now...
+
+    def perform_move(self, freq):
+        self.move_to_side(self.t * self.real_ratio_of_movement / 2, freq, lefty=True)
         self.spider.time_master.part_of_movement(1 / 2)
-        self.move_to_side(t * self.real_ratio_of_movement / 2, freq, lefty=False)
+        self.move_to_side(self.t * self.real_ratio_of_movement / 2, freq, lefty=False)
 
     def move_to_side(self, total_time, freq, lefty):
         DEGREES_TO_MOVE = 45

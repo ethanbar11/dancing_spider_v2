@@ -1,8 +1,10 @@
+import math
+
 TIBIA_LEN = 77.5
 FEMUR_LEN = 55
 COXA_LEN = 27.5
 TOTAL = TIBIA_LEN + FEMUR_LEN + COXA_LEN
-SPIDER_RADIUS = 50 #todo: check what is the real radius...
+SPIDER_RADIUS = math.sqrt(math.pow(62, 2) + math.pow(40, 2))
 
 length_side = 71
 z_absolute = -28
