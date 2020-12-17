@@ -99,15 +99,14 @@ class Leg:
             self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk,
                                         (25.3 - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
                                          56.8 - SPIDER_RADIUS / math.sqrt(2), -50))
-
-    def step_forward(self):
+    def step_forward(self, t, freq):
         if self.num == 1 or self.num == 4:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk_reversed,
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk_reversed,
                                         (x_default + x_offset, y_start, z_default))
         elif self.num == 2:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk, (25.3, -56.8, -50))
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, -56.8, -50))
         elif self.num == 3:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk, (25.3, 56.8, -50))
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, 56.8, -50))
 
     def move_heap_forward(self):
         angle_to_add = -33
