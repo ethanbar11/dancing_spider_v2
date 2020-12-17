@@ -18,6 +18,22 @@ def silly_tan_walk(start_pos, phi, end_pos):
                start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
 
 
+def silly_tan_rotate(start_pos, phi, end_pos):
+    if phi <= 1 / 2:
+        diff = end_pos[1] - start_pos[1]
+        progress_y = diff * phi * 2
+
+        cur_x, cur_y, cur_z = start_pos[0], start_pos[1] + progress_y, \
+                              start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
+    else:
+        diff = end_pos[0] - start_pos[0]
+        progress_x = diff * (phi - 1 / 2) * 2
+
+        cur_x, cur_y, cur_z = start_pos[0] + progress_x, end_pos[1], \
+                              start_pos[2] + SIN_MAX_HEIGHT * math.sin(phi * math.pi)
+    # x**2 + y ** 2 = SPIDER_RADIUS
+
+
 def silly_tan_walk_reversed(start_pos, phi, end_pos):
     if phi <= 1 / 2:
         diff = end_pos[0] - start_pos[0]

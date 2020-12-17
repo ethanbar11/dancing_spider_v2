@@ -140,5 +140,5 @@ def add_hard_coded_angle_fix(a, b, g):
 if __name__ == '__main__':
     print(x_default - x_offset, 0, z_default)
     ang = axis_to_angle(3, x_default - x_offset, 0, z_default)
-    ang=add_hard_coded_angle_fix(ang[0],ang[1],ang[2])
-    print(angle_to_axis(3, ang[0]+66, ang[1], ang[2]))
+    ang = add_hard_coded_angle_fix(ang[0], ang[1], ang[2])
+    print(angle_to_axis(3, ang[0] + 66, ang[1], ang[2]))

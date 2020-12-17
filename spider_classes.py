@@ -35,9 +35,8 @@ class Joint:
         self.angle = None
 
     def set_angle(self, angle):
-        # self.servo.angle = angle
-        # self.angle = angle
-        pass
+        self.servo.angle = angle
+        self.angle = angle
 
     def straighten(self):
         self.servo.angle = self.zero_a
@@ -87,6 +86,20 @@ class Leg:
         self.y = y
         self.z = z
 
+    def rotate_step(self):
+        if self.num == 1 or self.num == 4:
+            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk_reversed,
+                                        (x_default + x_offset - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
+                                         y_start - SPIDER_RADIUS / math.sqrt(2), z_default))
+        elif self.num == 2:
+            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk,
+                                        (25.3 - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
+                                         -56.8 - SPIDER_RADIUS / math.sqrt(2), -50))
+        elif self.num == 3:
+            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk,
+                                        (25.3 - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
+                                         56.8 - SPIDER_RADIUS / math.sqrt(2), -50))
+
     def step_forward(self):
         if self.num == 1 or self.num == 4:
             self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk_reversed,
@@ -130,7 +143,11 @@ class Leg:
     # t is time
     def func2seg_axis(self, t, freq, func, end_pos=None):
         n = int(t * freq)
-        return [func(self.pos, i / n, end_pos) for i in range(n + 1)]
+        x = []
+        for i in range(n + 1):
+            x.append(func(self.pos, i/n, end_pos))
+        return x
+        # return [func(self.pos, i / n, end_pos) for i in range(n + 1)]
 
     def func2seg_angles(self, t, freq, func, end_pos=None):
         n = int(t * freq)
@@ -147,17 +164,17 @@ def get_servos_dictionary(kit):
 
 class Spider:
     def __init__(self, csv_path):
-        # self.i2c = busio.I2C(board.SCL, board.SDA)
-        # self.pca = adafruit_pca9685.PCA9685(self.i2c)
-        # self.kit = ServoKit(channels=16)
-        # self.pca.frequency = 60
-        self.time_master=None
+        self.i2c = busio.I2C(board.SCL, board.SDA)
+        self.pca = adafruit_pca9685.PCA9685(self.i2c)
+        self.kit = ServoKit(channels=16)
+        self.pca.frequency = 60
+        self.time_master = None
         self.joints = {}
         self.legs = []
-        servos = {'1A': '', '1B': '', '1C': '', '2A': [], '2B': [],
-                  '2C': [], '3A': [], '3B': [], '3C': [], '4A': [],
-                  '4B': [], '4C': []}
-        # get_servos_dictionary(self.kit)
+        # servos = {'1A': '', '1B': '', '1C': '', '2A': [], '2B': [],
+        #          '2C': [], '3A': [], '3B': [], '3C': [], '4A': [],
+        #          '4B': [], '4C': []}
+        servos = get_servos_dictionary(self.kit)
         self.init_joints(csv_path, servos)
         self.init_legs()
         self.is_running = True
@@ -183,6 +200,21 @@ class Spider:
         for leg in self.legs:
             leg.straighten()
             time.sleep(0.01)
+
+    def rotate_step(self):
+        self.legs[3].rotate_step()
+        self.legs[0].rotate_step()
+        self.legs[1].rotate_step()
+        time.sleep(1000)
+        # for leg in self.legs[::-1]:
+        #     leg.move_heap_forward()
+        # time.sleep(0.5)
+        # self.legs[0].step_forward()
+        # self.legs[1].step_forward()
+        # for leg in self.legs[::-1]:
+        #     leg.move_heap_forward()
+        # time.sleep(0.5)
+        # self.legs[3].step_forward()
 
     def step_forward(self):
         self.legs[2].step_forward()
@@ -224,17 +256,17 @@ class Spider:
                 while time.time() - current_time < time_to_wait:
                     pass
             real_time_to_sleep -= time_to_wait
-
-    def heap_rotate_dance(self, total_time, freq, lefty=True):
-        ANGLES_TO_ROT_VAL = 20
-        angle_to_rotate = -ANGLES_TO_ROT_VAL if lefty else ANGLES_TO_ROT_VAL
-        n = total_time * freq
-
-        for i in range(angle_to_rotate):
-            for leg in self.legs:
-                current_angle = leg.coxa_joint.angle
-                leg.coxa_joint.set_angle(current_angle + angle_to_rotate / n)
-                leg.x, leg.y, leg.z = IK.angle_to_axis(leg.num, leg.coxa_joint.angle,
-                                                       leg.femur_joint.angle,
-                                                       leg.tibia_joint.angle)
-                time.sleep(total_time / n)
+    #
+    # def heap_rotate_dance(self, total_time, freq, lefty=True):
+    #     ANGLES_TO_ROT_VAL = 20
+    #     angle_to_rotate = -ANGLES_TO_ROT_VAL if lefty else ANGLES_TO_ROT_VAL
+    #     n = total_time * freq
+    #
+    #     for i in range(angle_to_rotate):
+    #         for leg in self.legs:
+    #             current_angle = leg.coxa_joint.angle
+    #             leg.coxa_joint.set_angle(current_angle + angle_to_rotate / n)
+    #             leg.x, leg.y, leg.z = IK.angle_to_axis(leg.num, leg.coxa_joint.angle,
+    #                                                    leg.femur_joint.angle,
+    #                                                    leg.tibia_joint.angle)
+    #             time.sleep(total_time / n)

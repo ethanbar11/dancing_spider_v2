@@ -12,7 +12,7 @@ if __name__ == '__main__':
     CSV_CONFIG_PATH = './spider_base_positions.csv'
 
     scen = scenario_spider.SpiderScenario(CSV_CONFIG_PATH)
-    scen.start_dancing(None,None)
+    scen.start_dancing(None, None)
     # Working IMPORTANT
     # pub.subscribe(scen.start_dancing, 'start_dancing')
     # robot_server.app.run('0.0.0.0')

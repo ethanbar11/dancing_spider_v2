@@ -32,12 +32,26 @@ class Stand(StandBase):
         self.spider.legs[1].set_angles_from_r(x_default - x_offset, -(y_start + y_step), z_default)
         self.spider.legs[2].set_angles_from_r(x_default + x_offset, y_start, z_default)
         self.spider.legs[3].set_angles_from_r(x_default + x_offset, y_start, z_default)
+        for i in self.spider.legs:
+            print(i.coxa_joint.angle)
 
+class OmerAdamStand(StandBase):
+    def __init__(self, spider):
+        super().__init__(spider)
+        self.movements = [LiftArm(self.spider)]
+
+    def perform_pose(self, t):
+        self.spider.legs[0].set_angles_from_r(x_default - x_offset, y_start + y_step, z_default)
+        self.spider.legs[1].set_angles_from_r(x_default - x_offset, -(y_start + y_step), z_default)
+        self.spider.legs[2].set_angles_from_r(x_default + x_offset, y_start +5, z_default + 30)
+        self.spider.legs[3].set_angles_from_r(x_default + x_offset-20, y_start + 20, z_default)
 
 class DanceStand(StandBase):
     def __init__(self, spider):
         super().__init__(spider)
-        self.movements = [Twerk(self.spider)]
+        # self.movements = [Twerk(self.spider), HeapMove(self.spider),PushUp(self.spider)]
+        #self.movements = [HeapMove(self.spider)]
+        self.movements = [PushUp(self.spider)]
 
     def perform_pose(self, t):
         self.spider.legs[0].set_angles_from_r(x_default, y_default, z_default)
@@ -61,3 +75,4 @@ class HumpStand(StandBase):
 stand = Stand(None)
 dance_stand = DanceStand(None)
 hump_stand = HumpStand(None)
+omer_adam_stand = OmerAdamStand(None)
