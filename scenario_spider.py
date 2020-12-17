@@ -35,9 +35,7 @@ class SpiderScenario:
         times_by_beat_to_dance = analyze_song.get_song_analysis("nicki minaj", "anaconda")
         # Yeah right here it ends
         self.spider.time_master = TimeMaster(times_by_beat_to_dance)
-        # start_time = time.time()
-        # real_start_time=time.time()
-        self.current_pose = self.stand
+        self.current_pose = self.dance_stand
         self.current_pose.perform_pose_wrapped(times_by_beat_to_dance[0])
         idx = 1
         while idx < len(times_by_beat_to_dance):

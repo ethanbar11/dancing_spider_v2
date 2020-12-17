@@ -25,7 +25,7 @@ class StandBase:
 class Stand(StandBase):
     def __init__(self, spider):
         super().__init__(spider)
-        self.movements = [LiftLeg(self.spider)]
+        self.movements = [LiftLeg(self.spider), StepForward(self.spider, True)]
 
     def perform_pose(self, t):
         self.spider.legs[0].set_angles_from_r(x_default - x_offset, y_start + y_step, z_default)

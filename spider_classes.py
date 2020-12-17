@@ -87,14 +87,14 @@ class Leg:
         self.y = y
         self.z = z
 
-    def step_forward(self):
+    def step_forward(self, t, freq):
         if self.num == 1 or self.num == 4:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk_reversed,
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk_reversed,
                                         (x_default + x_offset, y_start, z_default))
         elif self.num == 2:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk, (25.3, -56.8, -50))
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, -56.8, -50))
         elif self.num == 3:
-            self.perform_func_with_axis(STEP_TIME, SERVO_FREQUENCY, motions.silly_tan_walk, (25.3, 56.8, -50))
+            self.perform_func_with_axis(t, freq, motions.silly_tan_walk, (25.3, 56.8, -50))
 
     def move_heap_forward(self):
         angle_to_add = -33
@@ -151,7 +151,7 @@ class Spider:
         # self.pca = adafruit_pca9685.PCA9685(self.i2c)
         # self.kit = ServoKit(channels=16)
         # self.pca.frequency = 60
-        self.time_master=None
+        self.time_master = None
         self.joints = {}
         self.legs = []
         servos = {'1A': '', '1B': '', '1C': '', '2A': [], '2B': [],

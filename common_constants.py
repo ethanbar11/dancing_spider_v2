@@ -21,7 +21,10 @@ STEP_LENGTH = 75
 STEP_LENGTH_LEG_2 = 60
 SIN_MAX_HEIGHT = 30
 SIN_MAX_WIDTH = 60
-STEP_TIME = 1
+
+# Walking time proportions constants, everything should be added to 1.
+ONE_LEG_STEP_PROPORTION = 1 / 6
+ONE_HEAP_MOVE_PROPORTION = 1 / 6
 
 # Servo constants
 SERVO_FREQUENCY = 50
