@@ -15,7 +15,7 @@ def change_to_d(angle):
 def axis_to_angle(leg, x, y, z):
     w = (sqrt(pow(x, 2) + pow(y, 2)))
     # w = w if x >= 0 else (-1) * w
-    v = w - COXA_LEN
+    v = w - COXA_LEN 
     # alpha = atan2(y, x) if w >= 0 else atan2(-y, -x)
     alpha = atan2(y, x)
     beta = atan2(z, v) + acos(

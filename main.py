@@ -4,7 +4,7 @@ import scenario_spider
 from pubsub import pub
 import robot_server
 import time
-
+ 
 if __name__ == '__main__':
     print('hello')
     artist_name = "nicki minaj"

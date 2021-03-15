@@ -88,12 +88,12 @@ class Leg:
     def rotate_step(self, t, freq):
         if self.num != 1:
             self.perform_func_with_axis(t, freq, motions.silly_tan_rotate,
-                                        (self.x + SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
-                                         self.y - SPIDER_RADIUS / math.sqrt(2), z_default))
-        else:
-            self.perform_func_with_axis(t, freq, motions.silly_tan_rotate,
                                         (self.x - SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
                                          self.y + SPIDER_RADIUS / math.sqrt(2), z_default))
+        else:
+            self.perform_func_with_axis(t, freq, motions.silly_tan_rotate,
+                                        (self.x + SPIDER_RADIUS * (1 - 1 / math.sqrt(2)),
+                                         self.y - SPIDER_RADIUS / math.sqrt(2), z_default))
 
     def step(self, t, freq, is_step_forward):
         step_forward_mul = 1 if is_step_forward else -1
