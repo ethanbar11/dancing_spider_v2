@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Dance, baby!</title>
+</head>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<body>
+<div style="margin-top: 220px; margin-left: 500px;">
+    <div class="col-md-4 text-center center">
+        {% if content[0] >= 0 %}
+            <img src="../static/{{ content[0] }}.gif" id="rand_gif" style="margin-left: -50px; margin-top: -50px">
+                <script>
+                    window.location.replace('/?q=song')
+                </script>
+        {% elif content[0] == -1 %}
+        <hgroup>
+            <h1>hit the</h1>
+            <h1>button</h1>
+            <h2>to dance</h2>
+        </hgroup>
+        <form method="post" action="/">
+            <button type="submit" id="singlebutton" name="singlebutton" class="btn btn-primary">Let's Dance!
+            </button>
+                </form>
+                </div>
+        {% elif content[0] == -2 %}
+            <iframe src="https://open.spotify.com/embed/track/{{ content[1] }}" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        {% elif content[0] == -3 %}
+            <hgroup>
+                <h2>Unrecognized Song</h2>
+                <h1>Sorry...</h1>
+            </hgroup>
+            <button onclick="window.location.href='/'" class="btn btn-primary" style="width:200px">Back</button>
+        {% else %}
+            <h1>dammit</h1>
+        {% endif %}
+</div>
+</body>
+</html>
